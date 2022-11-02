@@ -5,6 +5,9 @@ import  {categories}  from '../utils/data';
 import Loader from './Loader';
 import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { storage } from '../firebase.config';
+import { getAllFoodItems, saveItem } from '../utils/firebaseFunctions';
+import { useStateValue } from '../context/StateProvider';
+import { actionType } from '../context/reducer';
 
 
 const CreateContainer = () => {
@@ -18,6 +21,7 @@ const CreateContainer = () => {
   const [alertStatus, setAlertStatus] = useState("danger");
   const [msg, setMsg] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [{foodItems},dispatch]=useStateValue();
 
   const uploadImage = (e)=>{
      setIsLoading(true);
@@ -47,6 +51,7 @@ const CreateContainer = () => {
         setIsLoading(false);
         setFields(true);
         setMsg('Image Uploaded successfully 👶');
+        
         setAlertStatus('success');
         setTimeout(()=>{
           setFields(false);
@@ -70,7 +75,70 @@ const CreateContainer = () => {
     
 
   };
-  const saveDetails=()=>{};
+  const saveDetails=()=>{
+    setIsLoading(true);
+    try{
+      if((!title||!calories||!price||!imageAsset||!Category)){
+        setFields(true);
+      setMsg("Required Field Can't be empty");
+      setAlertStatus('danger');
+      setTimeout(() => {
+        setFields(false);
+        setIsLoading(false);
+      }, 4000);
+
+      }else{
+        const data={
+          id:`${Date.now()}`,
+          title:title,
+          imageURL:imageAsset,
+          category:Category,
+          calories:calories,
+          qty:1,
+          price:price
+        }
+        saveItem(data);
+        setIsLoading(false)
+        setFields(true);
+      setMsg('Data Uploaded SuceessFully 👩‍💻');
+      clearData();
+      setAlertStatus('success');
+      setTimeout(() => {
+        setFields(false);
+
+      }, 4000);
+      }
+
+    }catch(error){
+      console.log(error);
+      setFields(true);
+      setMsg('Error while uploading : Try Again 💔');
+      setAlertStatus('danger');
+      setTimeout(() => {
+        setFields(false);
+        setIsLoading(false);
+      }, 4000);
+    }
+    fetchData();
+  }; 
+  const clearData =()=>{
+    setTitle("");
+    setImageAsset(null);
+    setCalories("");
+    setPrice("");
+    setCategory("Select category");
+
+  }
+
+  const fetchData = async () =>{
+    await getAllFoodItems().then( data =>{
+     dispatch({
+      type:actionType.SET_FOOD_ITEMS,
+      foodItems : data
+     });
+    });
+  }
+
   
   return (
     <div className='w-full min-h-screen h-auto p-4 flex items-center justify-center'>
@@ -164,7 +232,8 @@ const CreateContainer = () => {
           <MdFoodBank className='text-gray-700 text-2xl'/>
           <input type='text'
           required 
-          value={(e)=>setCalories(e.target.value)}
+          value={calories}
+          onChange={(e)=>setCalories(e.target.value)}
           placeholder="Colories"
           className='w-full h-full text-lg bg-transparent outline-none
           border-none placeholder:text-gray-400 text-textColor' />
@@ -177,7 +246,8 @@ const CreateContainer = () => {
           className='text-gray-700 text-2xl'/>
           <input type='text'
           required
-          value={(e)=>setPrice(e.target.value)} 
+          value={price}
+          onChange={(e)=>setPrice(e.target.value)} 
           placeholder="Price"
           className='w-full h-full text-lg bg-transparent outline-none
           border-none placeholder:text-gray-400 text-textColor' />
