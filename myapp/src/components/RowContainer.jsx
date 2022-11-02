@@ -1,14 +1,32 @@
 import { motion } from 'framer-motion'
-import React,{useEffect,useRef} from 'react'
+import React,{useEffect,useRef,useState} from 'react'
 import { MdShoppingBasket } from 'react-icons/md'
+import { actionType } from '../context/reducer'
+import { useStateValue } from '../context/StateProvider'
 import NotFound from '../img/NotFound.svg'
 
 const RowContainer = ({flag,data,scrollValue}) => {
-     console.log(data);
-     const rowContainer= useRef(0)
+     const rowContainer= useRef();
+
+     const [items, setItems] = useState([])
+
+     const[{cartItems},dispatch]=useStateValue();
+
+     const addtocart=()=>{
+        
+         dispatch({
+            type:actionType.SET_CARTITEMS,
+            cartItems:items,
+         });
+         localStorage.setItem("cartItems",JSON.stringify(items))
+     };
      useEffect(() => {
         rowContainer.current.scrollLeft += scrollValue;
      }, [scrollValue])
+
+     useEffect(()=>{
+        addtocart();
+     },[items])
   return (
     <div 
     ref={rowContainer}
@@ -18,15 +36,15 @@ const RowContainer = ({flag,data,scrollValue}) => {
          :'overflow-x-hidden flex-wrap justify-center'
         }`}
         >{
-        data ? (data.map(item => (    
+       data && data.length > 0 ? (data.map(item => (    
         <div 
          key={item.id}
-        className='w-300 h-[250px] min-w-[275px] flex items-center flex-col 
+        className='w-275 h-[175px] min-w-[275px] flex items-center flex-col 
         md:min-w-[300px] md:w-300
          bg-cardOverlay rounded-lg my-12 py-2 px-4 backdrop-blur-lg hover:drop-shadow-lg
          justify-evenly relative'>
-        <div
-        className='w-full flex  items-center justify-between'>
+        <div 
+        className='w-full flex items-center justify-between'>
             <motion.div 
              whileHover={{scale:1.2}}
              className='w-40 h-40 -mt-8  drop-shadow-2xl'
@@ -39,7 +57,9 @@ const RowContainer = ({flag,data,scrollValue}) => {
             <motion.div
             whileTap={{scale:0.75}}
             className='w-8 h-8 rounded-full bg-red-600 flex items-center
-            justify-center cursor-pointer hover:shadow-md -mt-8'>
+            justify-center cursor-pointer hover:shadow-md -mt-8'
+            onClick={()=>setItems([...cartItems,item])}
+            >
                 <MdShoppingBasket className='text-white'/>
             </motion.div>
            </div>
@@ -57,9 +77,9 @@ const RowContainer = ({flag,data,scrollValue}) => {
         </div>
         ))
         ):(
-        <div className='w-full h-40 flex items-center justify-center'>
-            <img src={NotFound} alt="" className='h-420'/>
-            <p>Items Not Available</p>
+        <div className='w-full flex flex-col items-center justify-center'>
+            <img src={NotFound} alt="" className='h-40'/>
+            <p className='text-xl text-headingColor font-semibold my-2'>Items Not Available</p>
         </div>
         )}
         </div>

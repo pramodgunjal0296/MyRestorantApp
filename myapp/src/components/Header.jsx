@@ -14,7 +14,7 @@ const Header = () => {
   const firebaseAuth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
-  const [{ user }, dispatch] = useStateValue();
+  const [{ user, cartShow,cartItems}, dispatch] = useStateValue();
 
   const [isMenu, setIsMenu] = useState(false);
 
@@ -33,28 +33,6 @@ const Header = () => {
     }
 
 
-
-
-    // const auth = getAuth();
-    // signInWithPopup(auth, provider)
-    //   .then((result) => {
-    //     // This gives you a Google Access Token. You can use it to access the Google API.
-    //     const credential = GoogleAuthProvider.credentialFromResult(result);
-    //     const token = credential.accessToken;
-    //     // The signed-in user info.
-    //     const user = result.user;
-    //     // ...
-    //   }).catch((error) => {
-    //     // Handle Errors here.
-    //     const errorCode = error.code;
-    //     const errorMessage = error.message;
-    //     // The email of the user's account used.
-    //     const email = error.customData.email;
-    //     // The AuthCredential type that was used.
-    //     const credential = GoogleAuthProvider.credentialFromError(error);
-    //     // ...
-    //   });
-
   }
   const logout = () => {
     setIsMenu(false)
@@ -63,6 +41,14 @@ const Header = () => {
     dispatch({
       type: actionType.SET_USER,
       user: null
+    });
+  }
+
+  const showCart = () => {
+
+    dispatch({
+      type: actionType.SET_CART_SHOW,
+      cartShow: !cartShow,
     });
   }
   return (
@@ -84,31 +70,34 @@ const Header = () => {
             hover:text-headnigColor duation-100
           transition-all ease-in-out
            cursor-pointer'
-           onClick={()=>setIsMenu(false)}
-           >Home</li>
+              onClick={() => setIsMenu(false)}
+            >Home</li>
             <li className='text-base text-textColor
              hover:text-headnigColor duation-100
           transition-all ease-in-out cursor-pointer'
-          onClick={()=>setIsMenu(false)}
-          >Menu</li>
+              onClick={() => setIsMenu(false)}
+            >Menu</li>
             <li className='text-base text-textColor 
             hover:text-headnigColor duation-100
           transition-all ease-in-out cursor-pointer'
-          onClick={()=>setIsMenu(false)}
-          >About Us</li>
+              onClick={() => setIsMenu(false)}
+            >About Us</li>
             <li className='text-base text-textColor hover:text-headnigColor duation-100
           transition-all ease-in-out cursor-pointer'
-          onClick={()=>setIsMenu(false)}
-          >Service</li>
+              onClick={() => setIsMenu(false)}
+            >Service</li>
 
           </motion.ul>
 
-          <div className='relative flex items-center justify-center'>
+          <div className='relative flex items-center justify-center' onClick={showCart}>
             <MdShoppingBasket className='text text-textColor text-2xl ml-8 cursor-pointer' />
-            <div className='absolute -right-2 -top-2 w-5 h-5  rounded-full bg-cartNumBg flex items-center justify-center'>
-              <p className='text-xs text-white font-semibold'>2</p>
+            {cartItems && cartItems.length > 0 && (
+              <div className='absolute -right-2 -top-2 w-5 h-5  rounded-full bg-cartNumBg flex items-center justify-center'>
+              <p className='text-xs text-white font-semibold'>{cartItems.length}</p>
+              </div>
+            )}
 
-            </div>
+           
           </div>
           <div className='relative'>
             <motion.img
@@ -131,7 +120,7 @@ const Header = () => {
                       <Link to={"/createItem"}>
                         <p className='px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-100 
          transition-all duration-100 ease-in-out text-textColor text-base'
-         onClick={()=>setIsMenu(false)}>
+                          onClick={() => setIsMenu(false)}>
                           New Item <MdAdd />
                         </p></Link>
 
@@ -150,15 +139,16 @@ const Header = () => {
 
 
       <div className='flex items-center justify-between md:hidden w-full h-full'>
-        <div className='relative flex items-center justify-center'>
+        <div className='relative flex items-center justify-center'
+          onClick={showCart}
+        >
           <MdShoppingBasket className='text text-textColor text-2xl
            ml-8 cursor-pointer' />
-          <div className='absolute -right-2 -top-2 w-5 h-5 
-           rounded-full bg-cartNumBg flex items-center justify-center'>
-
-            <p className='text-xs text-white font-semibold'>2</p>
-
-          </div>
+           {cartItems && cartItems.length > 0 && (
+              <div className='absolute -right-2 -top-2 w-5 h-5  rounded-full bg-cartNumBg flex items-center justify-center'>
+              <p className='text-xs text-white font-semibold'>{cartItems.length}</p>
+              </div>
+            )}
         </div>
         <Link to={'/'} className='flex items-center gap-2'>
           <img src={Logo} className='w-8 object-cover' alt="logo" />
